@@ -11,13 +11,20 @@ import * as assert from 'assert';
 
 const PREFIX = 'http://example.org/#';
 const DATASET_SIZES = [
+    1_000,
+    5_000,
     10_000,
+    50_000,
     100_000,
+    500_000,
+    1_000_000, // Requires 9GB of RAM for quoted-idx
 ];
 const DEPTHS = [
     1,
     2,
     3,
+    4,
+    5,
 ];
 const COLORS = [
     'red',
@@ -31,7 +38,6 @@ const COLORS = [
     'brown',
     'pink',
 ]
-const QUERIES = 10; // TODO: replication?
 const METHODS = {
     'singular': () => new RdfStore({
         indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
@@ -123,7 +129,7 @@ function queryPeople(store, size, depth) {
         }
 
         assert.equal(store.getQuads(
-            DF.variable(`person`),
+            undefined,
             DF.namedNode(`${PREFIX}says`),
             leaf
         ).length, size / 10);
@@ -140,8 +146,10 @@ function getStoreSize(store) {
     let size = 0;
     if (store.dictionary instanceof TermDictionaryQuotedIndexed) {
         size = JSON.stringify(store.dictionary.plainTermDictionary).length +
-            JSON.stringify(store.dictionary.quotedTriplesDictionary).length +
-            JSON.stringify(store.dictionary.quotedTriplesReverseDictionary.nestedRecords).length;
+            JSON.stringify(store.dictionary.quotedTriplesDictionary).length;
+        for (const subDict of store.dictionary.quotedTriplesReverseDictionaries) {
+            size += JSON.stringify(subDict.nestedMap).length;
+        }
     } else {
         size = JSON.stringify(store.dictionary).length;
     }
@@ -152,11 +160,9 @@ function getStoreSize(store) {
 }
 
 function run() {
-    console.log(`| Size | Depth | Method | Ingestion time | Query (s:high) | Query (s:med) | Query (s:low) | Storage size (MB) |`);
-    console.log(`| ---- | ----- | ------ | -------------- | --------------------- | ------------------- | ------------ |`);
-
-    // TODO: can we make low selectivity faster? because its really slow.... The more depth, the slower. Is it a bug?
-    // TODO: if unfixable, another selectivity between med and low? (with defined person instead of variable)
+    // console.log(`| Size | Depth | Method | Ingestion time | Query (s:high) | Query (s:med) | Query (s:low) | Storage size (MB) |`);
+    // console.log(`| ---- | ----- | ------ | -------------- | --------------------- | ------------------- | ------------ |`);
+    console.log(`size,depth,Method,ingestion,query-high,query-med,query-low,size`);
 
     // Warmup
     for (let i = 0; i < 3; i++) {
@@ -182,7 +188,8 @@ function run() {
                 const timeQueryColors = measure(() => queryColors(store, size, depth));
                 const timeQueryPeople = measure(() => queryPeople(store, size, depth));
                 const storeSize = getStoreSize(store);
-                console.log(`| ${size} | ${depth} | ${method} | ${timeIngest.toLocaleString('en-US', FMT)} | ${timeQueryExact.toLocaleString('en-US', FMT)} | ${timeQueryColors.toLocaleString('en-US', FMT)} | ${timeQueryPeople.toLocaleString('en-US', FMT)} | ${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT)} |`);
+                // console.log(`| ${size} | ${depth} | ${method} | ${timeIngest.toLocaleString('en-US', FMT)} | ${timeQueryExact.toLocaleString('en-US', FMT)} | ${timeQueryColors.toLocaleString('en-US', FMT)} | ${timeQueryPeople.toLocaleString('en-US', FMT)} | ${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT)} |`);
+                console.log(`${size},${depth},${method},${timeIngest.toLocaleString('en-US', FMT)},${timeQueryExact.toLocaleString('en-US', FMT)},${timeQueryColors.toLocaleString('en-US', FMT)},${timeQueryPeople.toLocaleString('en-US', FMT)},${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT)}`);
             }
         }
     }

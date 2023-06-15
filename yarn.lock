@@ -26,10 +26,10 @@ rdf-data-factory@^1.1.0, rdf-data-factory@^1.1.1:
   dependencies:
     "@rdfjs/types" "*"
 
-rdf-stores@^1.0.0-beta.1:
-  version "1.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/rdf-stores/-/rdf-stores-1.0.0-beta.1.tgz#5b94aaeffb05172820ee85120dac134e44a3c7b8"
-  integrity sha512-KzXLWmfkNrctt89OdCr3sGZHD3689ygl4GTsbnkZ7LFg+M3GCPbONUMUa6gbRGdz1P4qa4/8FW8anvYbzXqRAQ==
+rdf-stores@^1.0.0-beta.2:
+  version "1.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/rdf-stores/-/rdf-stores-1.0.0-beta.2.tgz#81f29b4fa94cfc0ccdc2d484df2976ff2da8c3fd"
+  integrity sha512-8OCMghQ6EkGGICmMdSzrUDfFtnookp+f0VtQRCKOqqnle+NNJQwlQh+FC4dR1lQPqUs7Cvd1voG1+VK79AOwXg==
   dependencies:
     "@rdfjs/types" "*"
     asynciterator "^3.8.0"

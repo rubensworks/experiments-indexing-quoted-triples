@@ -7,6 +7,6 @@
   "private": true,
   "dependencies": {
     "rdf-data-factory": "^1.1.1",
-    "rdf-stores": "^1.0.0-beta.1"
+    "rdf-stores": "^1.0.0-beta.2"
   }
 }
