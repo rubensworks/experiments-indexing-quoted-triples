@@ -1,0 +1,12 @@
+{
+  "name": "memory-indexing-quoted-triples",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "author": "Ruben Taelman <ruben.taelman@ugent.be>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "rdf-data-factory": "^1.1.1",
+    "rdf-stores": "^1.0.0-beta.1"
+  }
+}
