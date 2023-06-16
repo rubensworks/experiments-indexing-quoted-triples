@@ -8,6 +8,8 @@ import {
     TermDictionaryQuotedReferential
 } from "rdf-stores";
 import * as assert from 'assert';
+import { fork } from 'node:child_process';
+import { fileURLToPath } from 'url';
 
 const PREFIX = 'http://example.org/#';
 const DATASET_SIZES = [
@@ -143,23 +145,42 @@ function measure(cb) {
 }
 
 function getStoreSize(store) {
-    let size = 0;
-    if (store.dictionary instanceof TermDictionaryQuotedIndexed) {
-        size = JSON.stringify(store.dictionary.plainTermDictionary).length +
-            JSON.stringify(store.dictionary.quotedTriplesDictionary).length;
-        for (const subDict of store.dictionary.quotedTriplesReverseDictionaries) {
-            size += JSON.stringify(subDict.nestedMap).length;
-        }
-    } else {
-        size = JSON.stringify(store.dictionary).length;
-    }
+    let size = getDictSize(store.dictionary);
     for (const indexWrapper of store.indexesWrapped) {
         size += JSON.stringify(indexWrapper.index.nestedMap).length;
     }
     return size;
 }
 
-function run() {
+function getDictSize(dict) {
+    let size = 0;
+    if (dict instanceof TermDictionaryQuoted) {
+        size += getDictSize(dict.plainTermDictionary) + getDictSize(dict.quotedTriplesDictionary);
+    } else if (dict instanceof TermDictionaryQuotedReferential) {
+        size += getDictSize(dict.plainTermDictionary);
+        for (const key in dict.quotedTriplesReverseDictionary) {
+            size += key.length + 1;
+        }
+    } else if (dict instanceof TermDictionaryQuotedIndexed) {
+        size += getDictSize(dict.plainTermDictionary) +
+            JSON.stringify(dict.quotedTriplesDictionary).length;
+        for (const subDict of dict.quotedTriplesReverseDictionaries) {
+            size += JSON.stringify(subDict.nestedMap).length;
+        }
+    } else if (dict instanceof TermDictionaryNumberRecordFullTerms) {
+        for (const key in dict.dictionary) {
+            size += key.length + 1;
+        }
+        for (const key in dict.reverseDictionary) {
+            size += 1 + JSON.stringify(dict.reverseDictionary[key].value).length;
+        }
+    } else {
+        throw new Error('Unknown dict type')
+    }
+    return size;
+}
+
+function runAll() {
     // console.log(`| Size | Depth | Method | Ingestion time | Query (s:high) | Query (s:med) | Query (s:low) | Storage size (MB) |`);
     // console.log(`| ---- | ----- | ------ | -------------- | --------------------- | ------------------- | ------------ |`);
     console.log(`datasetsize;depth;method;ingestion;query-high;query-med;query-low;size`);
@@ -187,11 +208,64 @@ function run() {
                 const timeQueryExact = measure(() => queryExact(store, size, depth));
                 const timeQueryColors = measure(() => queryColors(store, size, depth));
                 const timeQueryPeople = measure(() => queryPeople(store, size, depth));
-                const storeSize = getStoreSize(store);
+                global.gc();
+                // TODO: try with exec using this same file...
+                const storeSize = process.memoryUsage().rss; // getStoreSize(store);
                 // console.log(`| ${size} | ${depth} | ${method} | ${timeIngest.toLocaleString('en-US', FMT)} | ${timeQueryExact.toLocaleString('en-US', FMT)} | ${timeQueryColors.toLocaleString('en-US', FMT)} | ${timeQueryPeople.toLocaleString('en-US', FMT)} | ${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT)} |`);
                 console.log(`${size};${depth};${method};${timeIngest.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryExact.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryColors.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryPeople.toLocaleString('en-US', FMT).replace(/,/g,'')};${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT).replace(/,/g,'')}`);
             }
         }
     }
 }
-run();
+// runAll();
+
+
+async function runMaster() {
+    console.log(`datasetsize;depth;method;ingestion;query-high;query-med;query-low;size`);
+    for (const size of DATASET_SIZES) {
+        for (const depth of DEPTHS) {
+            for (const method in METHODS) {
+                const child = fork(fileURLToPath(import.meta.url), ['child', size, depth, method]);
+                await new Promise((resolve, reject) => {
+                    child.on('error', reject);
+                    child.on('close', resolve);
+                });
+            }
+        }
+    }
+}
+
+function runChild(size, depth, method) {
+    // Small warmup
+    {
+        const triples = generateTriples(1000, 2);
+        for (let i = 0; i < 3; i++) {
+            const store = METHODS[method]();
+            ingest(store, triples);
+            queryExact(store, 1000, 2);
+            queryColors(store, 1000, 2);
+            queryPeople(store, 1000, 2);
+        }
+    }
+
+    let triples = generateTriples(size, depth);
+
+    const store = METHODS[method]();
+    const timeIngest = measure(() => ingest(store, triples));
+    const timeQueryExact = measure(() => queryExact(store, size, depth));
+    const timeQueryColors = measure(() => queryColors(store, size, depth));
+    const timeQueryPeople = measure(() => queryPeople(store, size, depth));
+
+    triples = [];
+    global.gc();
+    const storeSize = process.memoryUsage().rss;
+
+    console.log(`${size};${depth};${method};${timeIngest.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryExact.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryColors.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryPeople.toLocaleString('en-US', FMT).replace(/,/g,'')};${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT).replace(/,/g,'')}`);
+}
+
+if (process.argv[2] === 'child') {
+    runChild(Number.parseInt(process.argv[3], 10), Number.parseInt(process.argv[4], 10), process.argv[5]);
+} else {
+    runMaster();
+}
+
