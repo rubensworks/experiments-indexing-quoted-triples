@@ -1,0 +1,100 @@
+\usepackage[utf8]{inputenc}
+
+
+% Page setup
+\usepackage{amsmath}
+
+% Typography
+\usepackage[scaled]{helvet}
+\let\familydefault\sfdefault
+\usepackage{sansmath}
+\sansmath
+
+\usepackage[usenames,svgnames]{xcolor}
+\usepackage{tikz,pgfplots}
+\usetikzlibrary{arrows,positioning,shapes,calc,intersections}
+\usepgfplotslibrary{colorbrewer}
+
+\newcommand\plotfontsize{\fontsize{9}{9}\selectfont}
+\pgfplotsset{compat=1.9,
+  axis lines=left,
+  every axis/.append style={
+    font=\plotfontsize,
+  },
+  label style={
+    font=\plotfontsize\bfseries,
+  },
+  tick label style={
+    font=\plotfontsize\bfseries,
+  },
+  legend cell align=left,
+  legend style={
+    /tikz/every even column/.append style={column sep=.3em},
+    draw=none, fill=none,
+    inner sep=0pt, outer sep=0pt,
+    anchor=north east,
+    text height=3pt,
+  },
+  %log base 10 number format code/.code={%
+  %  $\pgfmathparse{10^(#1)}\pgfmathprintnumber{\pgfmathresult}$%
+  %},
+  cycle list/Spectral-4,
+  discard if below/.style 2 args={
+      x filter/.append code={
+          \edef\tempa{\thisrow{#1}}
+          \edef\tempb{#2}
+          \ifdim\tempa pt<\tempb pt
+          \else
+              \def\pgfmathresult{inf}
+          \fi
+      }
+  },
+  discard if not/.style 2 args={
+      x filter/.append code={
+          \edef\tempa{\thisrow{#1}}
+          \edef\tempb{#2}
+          \ifx\tempa\tempb
+          \else
+              \def\pgfmathresult{inf}
+          \fi
+      }
+  },
+}
+
+\newenvironment{resultAxis}[1][]{
+\begin{axis}[
+    width=350pt,
+    height=96pt,
+    xmin=0,
+    %ymin=0,
+    log origin=infty,log ticks with fixed point,
+    ymode=log,
+    xmode=log,
+    %Y_MAX%
+    yticklabel style={
+            /pgf/number format/fixed,
+            /pgf/number format/precision=5
+    },
+    scaled y ticks=false,
+    xticklabel style={
+            /pgf/number format/fixed,
+            /pgf/number format/precision=5
+    },
+    scaled x ticks=false,
+    x axis line style=-,
+    scale only axis,
+    clip=false,
+    axis on top,
+    xlabel={Triples},
+    ylabel={Time (ms)},
+    cycle list name=Spectral-4,
+    every axis plot/.append style={line width=1pt},
+    legend style={at={(1,0)},anchor=south east},
+    legend entries = {singular,quoted,quoted-ref,quoted-idx},
+    m-singular/.style={mark=*,mark options={solid},discard if not={method}{singular}},
+    m-quoted/.style={mark=triangle*,mark options={solid},discard if not={method}{quoted}},
+    m-quoted-ref/.style={mark=square*,mark options={solid},discard if not={method}{quoted-ref}},
+    m-quoted-idx/.style={mark=diamond*,mark options={solid},discard if not={method}{quoted-idx}},
+    #1
+]
+}{\end{axis}}

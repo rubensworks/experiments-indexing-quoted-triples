@@ -162,7 +162,7 @@ function getStoreSize(store) {
 function run() {
     // console.log(`| Size | Depth | Method | Ingestion time | Query (s:high) | Query (s:med) | Query (s:low) | Storage size (MB) |`);
     // console.log(`| ---- | ----- | ------ | -------------- | --------------------- | ------------------- | ------------ |`);
-    console.log(`size,depth,Method,ingestion,query-high,query-med,query-low,size`);
+    console.log(`datasetsize;depth;method;ingestion;query-high;query-med;query-low;size`);
 
     // Warmup
     for (let i = 0; i < 3; i++) {
@@ -189,7 +189,7 @@ function run() {
                 const timeQueryPeople = measure(() => queryPeople(store, size, depth));
                 const storeSize = getStoreSize(store);
                 // console.log(`| ${size} | ${depth} | ${method} | ${timeIngest.toLocaleString('en-US', FMT)} | ${timeQueryExact.toLocaleString('en-US', FMT)} | ${timeQueryColors.toLocaleString('en-US', FMT)} | ${timeQueryPeople.toLocaleString('en-US', FMT)} | ${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT)} |`);
-                console.log(`${size},${depth},${method},${timeIngest.toLocaleString('en-US', FMT)},${timeQueryExact.toLocaleString('en-US', FMT)},${timeQueryColors.toLocaleString('en-US', FMT)},${timeQueryPeople.toLocaleString('en-US', FMT)},${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT)}`);
+                console.log(`${size};${depth};${method};${timeIngest.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryExact.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryColors.toLocaleString('en-US', FMT).replace(/,/g,'')};${timeQueryPeople.toLocaleString('en-US', FMT).replace(/,/g,'')};${(storeSize / 1024 / 1024).toLocaleString('en-US', FMT).replace(/,/g,'')}`);
             }
         }
     }

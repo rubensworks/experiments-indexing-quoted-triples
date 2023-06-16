@@ -1,0 +1,17 @@
+\documentclass[preview]{standalone}
+\input{results-common.tex}
+\begin{document}
+\pagestyle{empty}
+
+\begin{tikzpicture}
+\begin{resultAxis}[ylabel={Size (MB)}]
+
+\addplot+[m-singular]   table [x=datasetsize, y=size, discard if not={depth}{5}, col sep=semicolon]{"results.csv"};
+\addplot+[m-quoted]     table [x=datasetsize, y=size, discard if not={depth}{5}, col sep=semicolon]{"results.csv"};
+\addplot+[m-quoted-ref] table [x=datasetsize, y=size, discard if not={depth}{5}, col sep=semicolon]{"results.csv"};
+\addplot+[m-quoted-idx] table [x=datasetsize, y=size, discard if not={depth}{5}, col sep=semicolon]{"results.csv"};
+
+\end{resultAxis}
+\end{tikzpicture}
+\end{document}
+

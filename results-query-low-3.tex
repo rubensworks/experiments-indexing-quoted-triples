@@ -1,0 +1,16 @@
+\documentclass[preview]{standalone}
+\input{results-common.tex}
+\begin{document}
+\pagestyle{empty}
+
+\begin{tikzpicture}
+\begin{resultAxis}
+
+\addplot+[m-singular]   table [x=datasetsize, y=query-low, discard if not={depth}{3}, col sep=semicolon]{"results.csv"};
+\addplot+[m-quoted]     table [x=datasetsize, y=query-low, discard if not={depth}{3}, col sep=semicolon]{"results.csv"};
+\addplot+[m-quoted-ref] table [x=datasetsize, y=query-low, discard if not={depth}{3}, col sep=semicolon]{"results.csv"};
+\addplot+[m-quoted-idx] table [x=datasetsize, y=query-low, discard if not={depth}{3}, col sep=semicolon]{"results.csv"};
+
+\end{resultAxis}
+\end{tikzpicture}
+\end{document}
