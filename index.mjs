@@ -14,19 +14,19 @@ import { fileURLToPath } from 'url';
 const PREFIX = 'http://example.org/#';
 const DATASET_SIZES = [
     1_000,
-    5_000,
-    10_000,
-    50_000,
-    100_000,
-    500_000,
-    1_000_000, // Requires 9GB of RAM for quoted-idx
+    // 5_000,
+    // 10_000,
+    // 50_000,
+    // 100_000,
+    // 500_000,
+    // 1_000_000, // Requires 9GB of RAM for quoted-idx
 ];
 const DEPTHS = [
     1,
-    2,
-    3,
-    4,
-    5,
+    // 2,
+    // 3,
+    // 4,
+    // 5,
 ];
 const COLORS = [
     'red',
@@ -41,30 +41,30 @@ const COLORS = [
     'pink',
 ]
 const METHODS = {
-    'singular': () => new RdfStore({
-        indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
-        indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
-        dictionary: new TermDictionaryNumberRecordFullTerms(),
-        dataFactory: new DataFactory(),
-    }),
-    'quoted': () => new RdfStore({
-        indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
-        indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
-        dictionary: new TermDictionaryQuoted(new TermDictionaryNumberRecordFullTerms(), new TermDictionaryNumberRecordFullTerms()),
-        dataFactory: new DataFactory(),
-    }),
+    // 'singular': () => new RdfStore({
+    //     indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
+    //     indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
+    //     dictionary: new TermDictionaryNumberRecordFullTerms(),
+    //     dataFactory: new DataFactory(),
+    // }),
+    // 'quoted': () => new RdfStore({
+    //     indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
+    //     indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
+    //     dictionary: new TermDictionaryQuoted(new TermDictionaryNumberRecordFullTerms(), new TermDictionaryNumberRecordFullTerms()),
+    //     dataFactory: new DataFactory(),
+    // }),
     'quoted-ref': () => new RdfStore({
         indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
         indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
         dictionary: new TermDictionaryQuotedReferential(new TermDictionaryNumberRecordFullTerms()),
         dataFactory: new DataFactory(),
     }),
-    'quoted-idx': () => new RdfStore({
-        indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
-        indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
-        dictionary: new TermDictionaryQuotedIndexed(new TermDictionaryNumberRecordFullTerms()),
-        dataFactory: new DataFactory(),
-    }),
+    // 'quoted-idx': () => new RdfStore({
+    //     indexCombinations: RdfStore.DEFAULT_INDEX_COMBINATIONS,
+    //     indexConstructor: subOptions => new RdfStoreIndexNestedMapQuoted(subOptions),
+    //     dictionary: new TermDictionaryQuotedIndexed(new TermDictionaryNumberRecordFullTerms()),
+    //     dataFactory: new DataFactory(),
+    // }),
 }
 const SCALE_DOWN_QUERIES = 100;
 const FMT = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
